@@ -1,5 +1,5 @@
 import { debug } from "../logging.js";
-import { init } from "./messaging.js";
+import { init, send, listen, isValidIceCandidateMessage } from "./messaging.js";
 import { errorNotificationElement } from "../components/error-notification-element.js";
 
 type Callback = (c: CallbackData) => void;
@@ -51,6 +51,69 @@ connection.addEventListener("signalingstatechange", function l(event) {
 	debug("signalingstatechange", "event=", event);
 });
 
+export async function createNewSdp(): Promise<RTCSessionDescriptionInit> {
+	const offer = await connection.createOffer();
+	await connection.setLocalDescription(offer);
+	return offer;
+}
+
+export async function receiveNewSdp(signal: RTCSessionDescriptionInit) {
+	await connection.setRemoteDescription(new RTCSessionDescription(signal));
+	if (signal.type === "answer") return;
+	const answer = await connection.createAnswer();
+	await connection.setLocalDescription(answer);
+	return answer;
+}
+
+export function getState() {
+	return {
+		connection,
+		mainDataChannel,
+		callback,
+	};
+}
+
+(window as any).getState = getState;
+(window as any).createNewSdp = createNewSdp;
+(window as any).receiveNewSdp = receiveNewSdp;
+
+export function setState(state: { callback: Callback }) {
+	// connection = state.connection ?? connection;
+	// mainDataChannel = state.mainDataChannel ?? mainDataChannel;
+	callback = state.callback ?? callback;
+}
+
+// These are one time functions to set up the initial data channel that will be
+// used as the signaling server for all future connection updates. We also use
+// the channel as a simple chat thing!
+export async function createSignal(): Promise<RTCSessionDescriptionInit> {
+	mainDataChannel = connection.createDataChannel("core-channel");
+	init(mainDataChannel);
+	mainDataChannel.onopen = () => {
+		callback({
+			type: "MainDataChannelReady",
+			data: mainDataChannel!,
+		});
+	};
+	return createNewSdp();
+}
+
+export async function receiveSignal(signal: RTCSessionDescriptionInit) {
+	return receiveNewSdp(signal);
+}
+
+export function initializeEverything() {
+	// hook up anything that relies on a signaling server to use the datachannel
+	connection.addEventListener("icecandidate", function l(event) {
+		send({ type: "ice-candidate", data: event.candidate! });
+	});
+	listen((message) => {
+		if (isValidIceCandidateMessage(message)) {
+			connection.addIceCandidate(message.data);
+		}
+	});
+}
+
 connection.addEventListener("datachannel", function l(event) {
 	connection.removeEventListener("datachannel", l);
 	const originalMainDataChannel = mainDataChannel;
@@ -87,42 +150,3 @@ connection.addEventListener("icecandidate", function l(candidate) {
 		});
 	}
 });
-
-export async function createSignal(): Promise<RTCSessionDescriptionInit> {
-	mainDataChannel = connection.createDataChannel("core-channel");
-	init(mainDataChannel);
-	mainDataChannel.onopen = () => {
-		callback({
-			type: "MainDataChannelReady",
-			data: mainDataChannel!,
-		});
-	};
-	const offer = await connection.createOffer({
-		offerToReceiveAudio: true,
-		offerToReceiveVideo: true,
-	});
-	await connection.setLocalDescription(offer);
-	return offer;
-}
-
-export async function receiveSignal(signal: RTCSessionDescriptionInit) {
-	connection.setRemoteDescription(new RTCSessionDescription(signal));
-	if (signal.type === "answer") return;
-	const answer = await connection.createAnswer();
-	await connection.setLocalDescription(answer);
-	return answer;
-}
-
-export function getState() {
-	return {
-		connection,
-		mainDataChannel,
-		callback,
-	};
-}
-
-export function setState(state: { callback: Callback }) {
-	// connection = state.connection ?? connection;
-	// mainDataChannel = state.mainDataChannel ?? mainDataChannel;
-	callback = state.callback ?? callback;
-}

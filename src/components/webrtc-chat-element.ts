@@ -1,5 +1,5 @@
 import { ShadowedWithStylesheetElement } from "./shadowed-with-stylesheet-element.js";
-import { send, listen } from "../webrtc/messaging.js";
+import { send, listen, isValidTextMessage } from "../webrtc/messaging.js";
 
 class WebRtcChatElement extends ShadowedWithStylesheetElement {
 	#chatDisplay: HTMLDivElement;
@@ -149,7 +149,7 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 			const p = this.#appendToChat(true, text);
 			this.#chatInput.value = "";
 			this.#onTextChanged();
-			send(text);
+			send({ type: "text", data: text });
 		};
 
 		// scale text area and other checks
@@ -158,8 +158,10 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 		};
 
 		// receive messages
-		listen((event) => {
-			this.#appendToChat(false, event.data);
+		listen((message) => {
+			if (isValidTextMessage(message)) {
+				this.#appendToChat(false, message.data);
+			}
 		});
 
 		// draggable window
