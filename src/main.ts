@@ -21,7 +21,7 @@ setState({
 				setTimeout(() => {
 					cl.removeAttribute("loading");
 					s.value = JSON.stringify(data);
-				}, start + 1500 - Date.now());
+				}, start + 0 - Date.now());
 				break;
 			case "MainDataChannelReady":
 				s1.setAttribute("fadeaway", String(true));

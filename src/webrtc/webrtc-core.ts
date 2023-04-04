@@ -68,7 +68,6 @@ export async function createSignal(): Promise<RTCSessionDescriptionInit> {
 	mainDataChannel = connection.createDataChannel("core-channel");
 	init(mainDataChannel);
 	mainDataChannel.onopen = () => {
-		send("open");
 		callback({
 			type: "MainDataChannelReady",
 			data: mainDataChannel!,

@@ -8,9 +8,8 @@
 		<script src="external/adapter-8.2.2.js"></script>
 	</head>
 	<body>
-		<section class="full-screen">
-			hello?
-			<button onclick="alert(1)">click me</button>
+		<section id="main-screen" class="full-screen">
+			<webrtc-chat></webrtc-chat>
 		</section>
 		<section id="connection-screen" class="full-screen fully-centered">
 			<div class="circle-container fully-centered">
@@ -24,5 +23,6 @@
 			</div>
 		</section>
 		<script type="module" src="main.js"></script>
+		<script type="module" src="components/webrtc-chat-element.js"></script>
 	</body>
 </html>

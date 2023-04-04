@@ -2,7 +2,7 @@
 	box-sizing: border-box;
 }
 
-section.full-screen {
+.full-screen {
 	width: 100vw;
 	height: 100vh;
 	position: absolute;
@@ -10,6 +10,10 @@ section.full-screen {
 	top: 0;
 	background: var(--bg);
 	color: var(--fg);
+}
+
+#main-screen {
+	padding: 16px;
 }
 
 #connection-screen {
@@ -75,6 +79,10 @@ textarea {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+web-rtc-chat {
+	position: absolute;
 }
 
 @keyframes rotate {
