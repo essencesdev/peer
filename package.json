@@ -9,7 +9,7 @@
 		"typescript": "^5.0.0"
 	},
 	"scripts": {
-		"flint": "prettier --write ./**/** && eslint --fix",
-		"build": "tsc && cp src/*.html built"
+		"flint": "prettier --write src && eslint --fix",
+		"build": "tsc && cd src && find . -path '*.html' -o -path '*.css' | xargs -I{} cp --parents {} ../built"
 	}
 }
