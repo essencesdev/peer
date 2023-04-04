@@ -1,5 +1,101 @@
+* {
+	box-sizing: border-box;
+}
+
+section.full-screen {
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	left: 0;
+	top: 0;
+	background: var(--bg);
+	color: var(--fg);
+}
+
+#connection-screen {
+	flex-direction: column;
+	z-index: 1;
+}
+
 textarea {
-	width: 50vw;
-	height: 50vh;
 	display: block;
+	background: var(--bg);
+	color: var(--fg);
+	overflow: none;
+	resize: none;
+	width: 66%;
+	height: 66%;
+	border: none;
+	outline: none;
+}
+
+.circle-container {
+	width: 500px;
+	height: 500px;
+	aspect-ratio: 1/1;
+}
+
+.circular,
+.circular::after {
+	width: 90%;
+	height: 90%;
+	background: var(--bg);
+	border-radius: 100%;
+	position: relative;
+}
+
+.circular::after {
+	content: "";
+	width: 110%;
+	height: 110%;
+	background: var(--grey-1);
+	position: absolute;
+	z-index: -1;
+	animation: 1s linear rotate infinite;
+}
+
+.circular[loading]::after {
+	background: conic-gradient(
+		var(--red-1),
+		var(--orange-1),
+		var(--green-1),
+		var(--blue-1),
+		var(--pink-1),
+		var(--teal-1),
+		var(--red-2),
+		var(--orange-2),
+		var(--green-2),
+		var(--blue-2),
+		var(--pink-2),
+		var(--teal-2)
+	);
+}
+
+.fully-centered {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotate(0);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+[fadeaway] {
+	animation: 1s linear fadeaway forwards;
+}
+
+@keyframes fadeaway {
+	0% {
+		opacity: 100%;
+	}
+	100% {
+		opacity: 0%;
+		visibility: hidden;
+	}
 }

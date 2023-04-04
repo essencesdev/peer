@@ -11,13 +11,20 @@ import {
 const s = document.getElementById("signal") as HTMLTextAreaElement;
 const cs = document.getElementById("create-signal") as HTMLButtonElement;
 const rs = document.getElementById("receive-signal") as HTMLButtonElement;
+const cl = document.getElementById("code-loader") as HTMLDivElement;
+const s1 = document.getElementById("connection-screen") as HTMLElement;
 
 setState({
 	callback: ({ type, data }) => {
 		switch (type) {
 			case "CandidatesReady":
-				s.value = JSON.stringify(data);
-				s.style.border = "10px solid lightgreen";
+				setTimeout(() => {
+					cl.removeAttribute("loading");
+					s.value = JSON.stringify(data);
+				}, start + 1500 - Date.now());
+				break;
+			case "MainDataChannelReady":
+				s1.setAttribute("fadeaway", String(true));
 				break;
 			default:
 				const x: never = type;
@@ -25,14 +32,16 @@ setState({
 	},
 });
 
+let start = Date.now();
 cs.onclick = () => {
-	createSignal().then(
-		(signal) => (s.value = "OLD: " + JSON.stringify(signal))
-	);
-	s.style.border = "none";
+	createSignal().then(() => {
+		start = Date.now();
+		cl.setAttribute("loading", String(true));
+	});
 };
 
 rs.onclick = () => {
 	receiveSignal(JSON.parse(s.value));
-	s.style.border = "none";
+	start = Date.now();
+	cl.setAttribute("loading", String(true));
 };

@@ -5,12 +5,24 @@
 		<title>peer</title>
 		<link rel="stylesheet" href="/colors.css" />
 		<link rel="stylesheet" href="style.css" />
-		<script src="https://webrtc.github.io/adapter/adapter-8.2.2.js"></script>
+		<script src="external/adapter-8.2.2.js"></script>
 	</head>
 	<body>
-		<textarea id="signal"></textarea>
-		<button id="create-signal">create session</button>
-		<button id="receive-signal">receive signal</button>
+		<section class="full-screen">
+			hello?
+			<button onclick="alert(1)">click me</button>
+		</section>
+		<section id="connection-screen" class="full-screen fully-centered">
+			<div class="circle-container fully-centered">
+				<div id="code-loader" class="circular fully-centered">
+					<textarea id="signal"></textarea>
+				</div>
+			</div>
+			<div>
+				<button id="create-signal">create session</button>
+				<button id="receive-signal">receive signal</button>
+			</div>
+		</section>
 		<script type="module" src="main.js"></script>
 	</body>
 </html>

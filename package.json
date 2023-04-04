@@ -10,6 +10,7 @@
 	},
 	"scripts": {
 		"flint": "prettier --write src && eslint --fix",
-		"build": "tsc && cd src && find . -path '*.html' -o -path '*.css' | xargs -I{} cp --parents {} ../built"
+		"copy-static": "cd src && find . -path '*.html' -o -path '*.css' -o -path './external/*' | xargs -I{} cp --parents {} ../built",
+		"build": "tsc && npm run copy-static"
 	}
 }

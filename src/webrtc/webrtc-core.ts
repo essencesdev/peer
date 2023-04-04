@@ -2,11 +2,16 @@ import { debug } from "../logging.js";
 import { init, send } from "./messaging.js";
 
 type Callback = (c: CallbackData) => void;
-type CallbackData = CandidatesReady;
+type CallbackData = CandidatesReady | MainDataChannelReady;
 
 interface CandidatesReady {
 	type: "CandidatesReady";
 	data: RTCSessionDescription;
+}
+
+interface MainDataChannelReady {
+	type: "MainDataChannelReady";
+	data: RTCDataChannel;
 }
 
 const configuration = {
@@ -17,6 +22,10 @@ const configuration = {
 let connection = new RTCPeerConnection(configuration);
 let mainDataChannel: RTCDataChannel | null = null;
 let callback: Callback = console.log;
+
+connection.addEventListener("connectionstatechange", function l(event) {
+	debug("connectionstatechange", "event=", event);
+});
 
 connection.addEventListener("datachannel", function l(event) {
 	connection.removeEventListener("datachannel", l);
@@ -32,6 +41,10 @@ connection.addEventListener("datachannel", function l(event) {
 		originalMainDataChannel
 	);
 	init(mainDataChannel);
+	callback({
+		type: "MainDataChannelReady",
+		data: mainDataChannel!,
+	});
 });
 
 connection.addEventListener("icecandidate", function l(candidate) {
@@ -56,6 +69,10 @@ export async function createSignal(): Promise<RTCSessionDescriptionInit> {
 	init(mainDataChannel);
 	mainDataChannel.onopen = () => {
 		send("open");
+		callback({
+			type: "MainDataChannelReady",
+			data: mainDataChannel!,
+		});
 	};
 	const offer = await connection.createOffer({
 		offerToReceiveAudio: true,
