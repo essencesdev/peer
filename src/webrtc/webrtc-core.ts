@@ -1,5 +1,6 @@
 import { debug } from "../logging.js";
-import { init, send } from "./messaging.js";
+import { init } from "./messaging.js";
+import { errorNotificationElement } from "../components/error-notification-element.js";
 
 type Callback = (c: CallbackData) => void;
 type CallbackData = CandidatesReady | MainDataChannelReady;
@@ -25,6 +26,29 @@ let callback: Callback = console.log;
 
 connection.addEventListener("connectionstatechange", function l(event) {
 	debug("connectionstatechange", "event=", event);
+	if (connection.connectionState === "failed") {
+		errorNotificationElement.addErrorMessage(
+			"Connection State has changed to failed. Maybe refresh the page and try again?"
+		);
+	}
+});
+connection.addEventListener("icecandidateerror", function l(event) {
+	debug("icecandidateerror", "event=", event);
+	errorNotificationElement.addErrorMessage(
+		"icecandidateerror event fired. Not sure what this is."
+	);
+});
+connection.addEventListener("iceconnectionstatechange", function l(event) {
+	debug("iceconnectionstatechange", "event=", event);
+});
+connection.addEventListener("icegatheringstatechange", function l(event) {
+	debug("icegatheringstatechange", "event=", event);
+});
+connection.addEventListener("negotiationneeded", function l(event) {
+	debug("negotiationneeded", "event=", event);
+});
+connection.addEventListener("signalingstatechange", function l(event) {
+	debug("signalingstatechange", "event=", event);
 });
 
 connection.addEventListener("datachannel", function l(event) {

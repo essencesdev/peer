@@ -23,6 +23,10 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 				overflow: auto;
 				display: flex;
 				flex-direction: column;
+
+				--chat-send-size: 40px;
+				--chat-send-padding: 5px;
+				--base-sizing: 16px;
 			}
 			* {
 				box-sizing: border-box;
@@ -54,13 +58,12 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 				content: "Them";
 				display: block;
 				font-size: 80%;
-
 			}
 			.message {
-				padding: 10px;
+				padding: var(--base-sizing);
 			}
 			#chat-header {
-				flex: 0 0 32px;
+				flex: 0 0 calc(var(--base-sizing) * 2);
 				background: var(--grey-1);
 				cursor: grab;
 			}
@@ -72,16 +75,16 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 			}
 			#chat-display {
 				flex: 1 1 80%;
-				margin: 16px;
-				padding: 16px;
+				margin: var(--base-sizing);
+				padding: var(--base-sizing);
 				overflow: auto;
 				word-break: break-all;
 			}
 			#chat-input-container {
 				flex: 0 0;
-				margin: 16px;
+				margin: var(--base-sizing);
 				margin-top: 0px; /* why no collapse */
-				height: 50px;
+				height: calc(var(--chat-send-size) + var(--chat-send-padding) * 2);
 				position: relative;
 			}
 			#chat-input {
@@ -90,16 +93,16 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 				border: none;
 				outline: none;
 				margin: 0;
-				padding: 5px;
-				padding-left: 50px;
+				padding: var(--chat-send-padding);
+				padding-left: calc(var(--chat-send-size) + var(--chat-send-padding) * 2);
 				resize: none;
 			}
 			#chat-send {
 				position: absolute;
-				left: 5px;
-				top: 5px;
-				width: 40px;
-				height: 40px;
+				left: var(--chat-send-padding);
+				top: var(--chat-send-padding);
+				width: var(--chat-send-size);
+				height: var(--chat-send-size);
 			}
 			#chat-send::after {
 				content: "✉";
@@ -129,6 +132,7 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 
 		this.#chatInput = document.createElement("textarea");
 		this.#chatInput.id = "chat-input";
+		this.#chatInput.placeholder = "Type here...";
 		this.#chatInput.classList.add("text");
 
 		this.#chatSend = document.createElement("button");

@@ -4,7 +4,8 @@
 		<meta charset="utf-8" />
 		<title>peer</title>
 		<link rel="stylesheet" href="/colors.css" />
-		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="connection-screen.css" />
+		<link rel="stylesheet" href="main-screen.css" />
 		<script src="external/adapter-8.2.2.js"></script>
 	</head>
 	<body>
@@ -17,12 +18,24 @@
 					<textarea id="signal"></textarea>
 				</div>
 			</div>
-			<div>
-				<button id="create-signal">create session</button>
+			<div id="controls">
+				<button id="create-signal">create signal</button>
 				<button id="receive-signal">receive signal</button>
 			</div>
+			<p id="description">
+				To connect to another user, data must be sent between two
+				devices. Press "create signal" on one device. Take the generated
+				text, paste it into the second device, and press "receive
+				signal". Text will be generated on the second device. Paste that
+				into the first device, replacing the original text, and click
+				"receive signal". The two devices should then be connected.
+			</p>
 		</section>
 		<script type="module" src="main.js"></script>
+		<script
+			type="module"
+			src="components/error-notification-element.js"
+		></script>
 		<script type="module" src="components/webrtc-chat-element.js"></script>
 	</body>
 </html>
