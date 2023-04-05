@@ -1,6 +1,6 @@
 import { WindowElement } from "./window-element.js";
 
-export class WebRtcVideoElement extends WindowElement {
+export class WebRtcMediaElement extends WindowElement {
 	#video: HTMLVideoElement;
 	#stream: MediaStream = new MediaStream();
 
@@ -52,4 +52,4 @@ export class WebRtcVideoElement extends WindowElement {
 	}
 }
 
-customElements.define("webrtc-video", WebRtcVideoElement);
+customElements.define("webrtc-media", WebRtcMediaElement);

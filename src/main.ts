@@ -3,22 +3,64 @@ import {
 	createNewSdp,
 	receiveNewSdp,
 } from "./webrtc/webrtc-core.js";
-import { WebRtcVideoElement } from "./components/webrtc-video-element.js";
+import { WebRtcMediaElement } from "./components/webrtc-media-element.js";
 import { WebRtcChatElement } from "./components/webrtc-chat-element.js";
 import {
 	send,
 	listen,
 	isValidTextMessage,
-	isValidVideoMessage,
-	isValidVideoAcceptMessage,
-	isValidVideoDeclineMessage,
+	isValidMediaMessage,
+	isValidMediaAcceptMessage,
+	isValidMediaDeclineMessage,
 } from "./webrtc/messaging.js";
 import { debug } from "./logging.js";
 
+const mainSection = document.getElementById("main-screen") as HTMLDivElement;
 const screenShare = document.getElementById(
 	"share-screen"
 ) as HTMLButtonElement;
-const mainSection = document.getElementById("main-screen") as HTMLDivElement;
+const audioShare = document.getElementById("share-audio") as HTMLButtonElement;
+
+screenShare.onclick = () => {
+	navigator.mediaDevices
+		// these seem to be video only
+		// so TODO: add ability to add audio track to thing
+		.getDisplayMedia({ audio: false, video: true })
+		.then((stream) => {
+			chat.appendMessageToChat(true, "requested to stream media");
+			const media = createMediaElement(true);
+
+			for (const track of stream.getTracks()) {
+				connection.addTrack(track);
+				media.addTrack(track);
+			}
+
+			return createNewSdp();
+		})
+		.then((sdp) => {
+			send({ id: Date.now(), type: "media", data: sdp });
+		});
+};
+
+audioShare.onclick = () => {
+	navigator.mediaDevices
+		// we need to alternate these arguments to share individual things
+		.getUserMedia({ audio: true, video: false })
+		.then((stream) => {
+			chat.appendMessageToChat(true, "requested to stream media");
+			const media = createMediaElement(true);
+
+			for (const track of stream.getTracks()) {
+				connection.addTrack(track);
+				media.addTrack(track);
+			}
+
+			return createNewSdp();
+		})
+		.then((sdp) => {
+			send({ id: Date.now(), type: "media", data: sdp });
+		});
+};
 
 const chat = document.getElementById("webrtc-chat") as WebRtcChatElement;
 chat.onSend = (message) => {
@@ -29,7 +71,7 @@ chat.onSend = (message) => {
 listen((message) => {
 	if (isValidTextMessage(message)) {
 		chat.appendMessageToChat(false, message.data);
-	} else if (isValidVideoMessage(message)) {
+	} else if (isValidMediaMessage(message)) {
 		chat.appendRequestToChat(
 			"would like to stream media",
 			() =>
@@ -37,51 +79,34 @@ listen((message) => {
 					if (sdp)
 						send({
 							id: message.id,
-							type: "video-accept",
+							type: "media-accept",
 							data: sdp,
 						});
 				}),
-			() => send({ id: message.id, type: "video-decline" })
+			() => send({ id: message.id, type: "media-decline" })
 		);
-	} else if (isValidVideoAcceptMessage(message)) {
-		chat.appendMessageToChat(false, "accepted your video request");
+	} else if (isValidMediaAcceptMessage(message)) {
+		chat.appendMessageToChat(false, "accepted your media request");
 		receiveNewSdp(message.data);
-	} else if (isValidVideoDeclineMessage(message)) {
-		chat.appendMessageToChat(false, "declined your video request");
+	} else if (isValidMediaDeclineMessage(message)) {
+		chat.appendMessageToChat(false, "declined your media request");
 	}
 });
 
-screenShare.onclick = () => {
-	navigator.mediaDevices
-		// firefox can't return multiple tracks
-		.getDisplayMedia({ audio: true, video: true })
-		.then((stream) => {
-			chat.appendMessageToChat(true, "requested to stream video");
-			const video = createVideoElement(true);
-
-			for (const track of stream.getTracks()) {
-				connection.addTrack(track);
-				video.addTrack(track);
-			}
-
-			return createNewSdp();
-		})
-		.then((sdp) => {
-			send({ id: Date.now(), type: "video", data: sdp });
-		});
-};
+// we can save elements by id, then apply track to specific elements
+// based on the id of the media message
 
 connection.addEventListener("track", (event) => {
 	debug("track", "event=", event);
 
-	const video = createVideoElement(false);
-	video.addTrack(event.track);
+	const media = createMediaElement(false);
+	media.addTrack(event.track);
 });
 
-function createVideoElement(source: boolean): WebRtcVideoElement {
-	const video = document.createElement("webrtc-video") as WebRtcVideoElement;
-	video.isSource = source;
-	mainSection.appendChild(video);
+function createMediaElement(source: boolean): WebRtcMediaElement {
+	const media = document.createElement("webrtc-media") as WebRtcMediaElement;
+	media.isSource = source;
+	mainSection.appendChild(media);
 
-	return video;
+	return media;
 }

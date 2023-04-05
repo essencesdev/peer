@@ -4,27 +4,27 @@ type ChannelListener = (d: Message, e: MessageEvent<any>) => void;
 
 type Message =
 	| TextMessage
-	| VideoStreamMessage
+	| MediaStreamMessage
 	| IceCandidateMessage
-	| VideoStreamAcceptMessage
-	| VideoStreamDeclineMessage;
+	| MediaStreamAcceptMessage
+	| MediaStreamDeclineMessage;
 interface TextMessage {
 	type: "text";
 	data: string;
 }
-interface VideoStreamMessage {
+interface MediaStreamMessage {
 	id: number;
-	type: "video";
+	type: "media";
 	data: RTCSessionDescriptionInit;
 }
-interface VideoStreamAcceptMessage {
+interface MediaStreamAcceptMessage {
 	id: number;
-	type: "video-accept";
+	type: "media-accept";
 	data: RTCSessionDescriptionInit;
 }
-interface VideoStreamDeclineMessage {
+interface MediaStreamDeclineMessage {
 	id: number;
-	type: "video-decline";
+	type: "media-decline";
 }
 interface IceCandidateMessage {
 	type: "ice-candidate";
@@ -55,42 +55,42 @@ export function isValidTextMessage(message: Message): message is TextMessage {
 	);
 }
 
-export function isValidVideoMessage(
+export function isValidMediaMessage(
 	message: Message
-): message is VideoStreamMessage {
+): message is MediaStreamMessage {
 	return (
 		message !== null &&
 		typeof message === "object" &&
 		"id" in message &&
 		typeof message.id === "number" &&
 		"type" in message &&
-		message.type === "video"
+		message.type === "media"
 	);
 }
 
-export function isValidVideoAcceptMessage(
+export function isValidMediaAcceptMessage(
 	message: Message
-): message is VideoStreamAcceptMessage {
+): message is MediaStreamAcceptMessage {
 	return (
 		message !== null &&
 		typeof message === "object" &&
 		"id" in message &&
 		typeof message.id === "number" &&
 		"type" in message &&
-		message.type === "video-accept"
+		message.type === "media-accept"
 	);
 }
 
-export function isValidVideoDeclineMessage(
+export function isValidMediaDeclineMessage(
 	message: Message
-): message is VideoStreamDeclineMessage {
+): message is MediaStreamDeclineMessage {
 	return (
 		message !== null &&
 		typeof message === "object" &&
 		"id" in message &&
 		typeof message.id === "number" &&
 		"type" in message &&
-		message.type === "video-decline"
+		message.type === "media-decline"
 	);
 }
 
