@@ -30,14 +30,26 @@
 	z-index: 1;
 }
 
+#qrcode,
+#signal {
+	width: 66%;
+	height: 66%;
+}
+
+:is(#qrcode, #signal)[hidden] {
+	display: none;
+}
+
+#qrcode > :is(img, canvas) {
+	width: 100%;
+}
+
 #signal {
 	display: block;
 	background: var(--bg);
 	color: var(--fg);
 	overflow: none;
 	resize: none;
-	width: 66%;
-	height: 66%;
 	border: none;
 	outline: none;
 }

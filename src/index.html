@@ -21,10 +21,26 @@
 			<div class="circle-container fully-centered">
 				<div id="code-loader" class="circular fully-centered">
 					<textarea id="signal"></textarea>
+					<div id="qrcode" hidden></div>
 				</div>
 			</div>
 			<div id="controls">
 				<button id="create-signal">create signal</button>
+				<div>
+					<label>
+						<input
+							type="radio"
+							value="text"
+							name="signal"
+							checked
+						/>
+						Text
+					</label>
+					<label>
+						<input type="radio" value="qrcode" name="signal" />
+						QR Code
+					</label>
+				</div>
 				<button id="receive-signal">receive signal</button>
 			</div>
 			<p id="description">

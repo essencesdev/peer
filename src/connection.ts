@@ -4,7 +4,7 @@ import {
 	setState,
 	initializeEverything,
 } from "./webrtc/webrtc-core.js";
-
+import { debug } from "./logging.js";
 import { errorNotificationElement } from "./components/error-notification-element.js";
 
 declare const QRCode: any;
@@ -14,6 +14,12 @@ const cs = document.getElementById("create-signal") as HTMLButtonElement;
 const rs = document.getElementById("receive-signal") as HTMLButtonElement;
 const cl = document.getElementById("code-loader") as HTMLDivElement;
 const s1 = document.getElementById("connection-screen") as HTMLElement;
+const q = document.getElementById("qrcode") as HTMLDivElement;
+const qrCode = new QRCode(q, {
+	width: 800,
+	height: 800,
+	correctLevel: QRCode.CorrectLevel.L,
+});
 
 setState({
 	callback: ({ type, data }) => {
@@ -22,6 +28,15 @@ setState({
 				setTimeout(() => {
 					onLoadingFinished();
 					s.value = compress(data);
+					try {
+						const url = new URL(document.URL);
+						url.hash = s.value;
+						qrCode.makeCode(url.href);
+					} catch (e) {
+						errorNotificationElement.addErrorMessage(
+							"Couldn't make qr code (probably because data was too long)"
+						);
+					}
 				}, minLoadTime + start - Date.now());
 				break;
 			case "MainDataChannelReady":
@@ -38,6 +53,7 @@ setState({
 let start = Date.now();
 const minLoadTime = 1000;
 cs.onclick = () => {
+	debug("cs.oclick");
 	onLoading();
 	try {
 		createSignal().then(() => {
@@ -49,6 +65,7 @@ cs.onclick = () => {
 };
 
 rs.onclick = () => {
+	debug("rs.onclick", "s.value=", s.value);
 	onLoading();
 	try {
 		receiveSignal(decompress(s.value));
@@ -73,10 +90,40 @@ function onLoadingFinished() {
 
 // TODO: qr code - we'll need to compress the data somehow as the normal
 // stringified version is too large for qr codes (~5000 chars)
+// well it seems like on ssl it is much smaller (~800 chars), this is probably
+// due to less ice candidates in the sdp
 function compress(data: RTCSessionDescription) {
+	debug("compress", "data=", data);
 	return btoa(JSON.stringify(data));
 }
 
 function decompress(data: string): RTCSessionDescription {
+	debug("decompress", "data=", data);
 	return JSON.parse(atob(data));
 }
+
+window.onhashchange = () => {
+	debug("onhashchange", "hash=", window.location.hash);
+	onLoading();
+	try {
+		receiveSignal(decompress(window.location.hash.slice(1)));
+		start = Date.now();
+	} catch (e) {
+		errorNotificationElement.addError(e as Error);
+	}
+};
+
+document
+	.querySelectorAll("input[type='radio'][name='signal']")
+	.forEach((element) => {
+		const input = element as HTMLInputElement;
+		input.onchange = () => {
+			if (input.value === "qrcode") {
+				q.removeAttribute("hidden");
+				s.setAttribute("hidden", "");
+			} else {
+				s.removeAttribute("hidden");
+				q.setAttribute("hidden", "");
+			}
+		};
+	});
