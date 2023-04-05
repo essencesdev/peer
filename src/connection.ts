@@ -9,8 +9,8 @@ import { errorNotificationElement } from "./components/error-notification-elemen
 
 declare const QRCode: any;
 
+const d = document.getElementById("description") as HTMLParagraphElement;
 const s = document.getElementById("signal") as HTMLTextAreaElement;
-const cs = document.getElementById("create-signal") as HTMLButtonElement;
 const rs = document.getElementById("receive-signal") as HTMLButtonElement;
 const cl = document.getElementById("code-loader") as HTMLDivElement;
 const s1 = document.getElementById("connection-screen") as HTMLElement;
@@ -26,7 +26,11 @@ setState({
 		switch (type) {
 			case "CandidatesReady":
 				setTimeout(() => {
-					onLoadingFinished();
+					onLoadingFinished(
+						"Copy this text to the other instance. " +
+							"If copying a code into this, replace the existing code and press the button. " +
+							"For QR codes, make sure the url is opened on the same page."
+					);
 					s.value = compress(data);
 					try {
 						const url = new URL(document.URL);
@@ -40,7 +44,7 @@ setState({
 				}, minLoadTime + start - Date.now());
 				break;
 			case "MainDataChannelReady":
-				onLoadingFinished();
+				onLoadingFinished("Starting...");
 				s1.setAttribute("fadeaway", String(true));
 				initializeEverything();
 				break;
@@ -52,46 +56,22 @@ setState({
 
 let start = Date.now();
 const minLoadTime = 1000;
-cs.onclick = () => {
-	debug("cs.oclick");
-	onLoading();
-	try {
-		createSignal().then(() => {
-			start = Date.now();
-		});
-	} catch (e) {
-		errorNotificationElement.addError(e as Error);
-	}
-};
-
-rs.onclick = () => {
-	debug("rs.onclick", "s.value=", s.value);
-	onLoading();
-	try {
-		receiveSignal(decompress(s.value));
-		start = Date.now();
-	} catch (e) {
-		errorNotificationElement.addError(e as Error);
-	}
-};
 
 function onLoading() {
+	d.innerText = "Loading...";
 	s.setAttribute("disabled", "");
-	cs.setAttribute("disabled", "");
 	rs.setAttribute("disabled", "");
 	cl.setAttribute("loading", "");
 }
 
-function onLoadingFinished() {
+function onLoadingFinished(message: string) {
+	d.innerText = message;
 	s.removeAttribute("disabled");
 	rs.removeAttribute("disabled");
 	cl.removeAttribute("loading");
 }
 
-// TODO: qr code - we'll need to compress the data somehow as the normal
-// stringified version is too large for qr codes (~5000 chars)
-// well it seems like on ssl it is much smaller (~800 chars), this is probably
-// due to less ice candidates in the sdp
+// the sdp seems to be short enough if using ssl (~900) otherwise it is (4000+)
 function compress(data: RTCSessionDescription) {
 	debug("compress", "data=", data);
 	return btoa(JSON.stringify(data));
@@ -102,28 +82,71 @@ function decompress(data: string): RTCSessionDescription {
 	return JSON.parse(atob(data));
 }
 
-window.onhashchange = () => {
-	debug("onhashchange", "hash=", window.location.hash);
-	onLoading();
-	try {
-		receiveSignal(decompress(window.location.hash.slice(1)));
-		start = Date.now();
-	} catch (e) {
-		errorNotificationElement.addError(e as Error);
-	}
-};
+// the url hash can contain the code
+(function initSignalListeners() {
+	let lastAttemptedHash: string | null = null;
 
-document
-	.querySelectorAll("input[type='radio'][name='signal']")
-	.forEach((element) => {
-		const input = element as HTMLInputElement;
-		input.onchange = () => {
-			if (input.value === "qrcode") {
-				q.removeAttribute("hidden");
-				s.setAttribute("hidden", "");
-			} else {
-				s.removeAttribute("hidden");
-				q.setAttribute("hidden", "");
-			}
-		};
-	});
+	const loadSignal = (signal: string) => {
+		start = Date.now();
+		onLoading();
+		return receiveSignal(decompress(signal)).catch((e) => {
+			errorNotificationElement.addError(e);
+			onLoadingFinished("Couldn't load this signal");
+		});
+	};
+
+	// check if hash/signal exists on load, if it does and works then the only
+	// thing left should be to send the response code
+	if (window.location.hash) {
+		lastAttemptedHash = window.location.hash;
+		loadSignal(lastAttemptedHash.slice(1));
+		rs.setAttribute("hidden", "");
+	} else {
+		start = Date.now();
+		onLoading();
+		createSignal();
+		rs.onclick = () => loadSignal(s.value);
+	}
+
+	window.onhashchange = () => {
+		debug("onhashchange", "hash=", window.location.hash);
+		if (window.location.hash === lastAttemptedHash) {
+			// perhaps caused by load checking it and the event also firing
+			return;
+		}
+		lastAttemptedHash = window.location.hash;
+		loadSignal(lastAttemptedHash.slice(1));
+	};
+})();
+
+// radio input determine whether or not to show qr code/text code
+(function initRadioInputs() {
+	const toggleStates = (input: HTMLInputElement) => {
+		if (input.value === "qrcode") {
+			q.removeAttribute("hidden");
+			s.setAttribute("hidden", "");
+		} else {
+			s.removeAttribute("hidden");
+			q.setAttribute("hidden", "");
+		}
+	};
+
+	// on load if something else is checked
+	const checked = document.querySelector(
+		"input[type='radio'][name='signal'][checked]"
+	);
+	if (!checked)
+		errorNotificationElement.addErrorMessage(
+			"Impossible: somehow have no radio inputs selected"
+		);
+	toggleStates(checked as HTMLInputElement);
+
+	document
+		.querySelectorAll("input[type='radio'][name='signal']")
+		.forEach((element) => {
+			const input = element as HTMLInputElement;
+			input.onchange = () => {
+				toggleStates(input);
+			};
+		});
+})();

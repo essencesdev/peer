@@ -36,8 +36,8 @@
 	height: 66%;
 }
 
-:is(#qrcode, #signal)[hidden] {
-	display: none;
+*[hidden] {
+	display: none !important;
 }
 
 #qrcode > :is(img, canvas) {
@@ -48,7 +48,6 @@
 	display: block;
 	background: var(--bg);
 	color: var(--fg);
-	overflow: none;
 	resize: none;
 	border: none;
 	outline: none;

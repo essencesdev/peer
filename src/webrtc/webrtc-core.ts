@@ -47,9 +47,6 @@ connection.addEventListener("icecandidateerror", function l(event) {
 connection.addEventListener("iceconnectionstatechange", function l(event) {
 	debug("iceconnectionstatechange", "event=", event);
 });
-connection.addEventListener("icegatheringstatechange", function l(event) {
-	debug("icegatheringstatechange", "event=", event);
-});
 connection.addEventListener("negotiationneeded", function l(event) {
 	debug("negotiationneeded", "event=", event);
 });
@@ -105,6 +102,7 @@ export async function createSignal(): Promise<RTCSessionDescriptionInit> {
 }
 
 export async function receiveSignal(signal: RTCSessionDescriptionInit) {
+	if (signal.type === "offer") mainDataChannel = null;
 	return receiveNewSdp(signal);
 }
 
@@ -118,6 +116,8 @@ export function initializeEverything() {
 			connection.addIceCandidate(message.data);
 		}
 	});
+	// also clean up other listeners
+	connection.onicegatheringstatechange = null;
 }
 
 connection.addEventListener("datachannel", function l(event) {
@@ -140,10 +140,9 @@ connection.addEventListener("datachannel", function l(event) {
 	});
 });
 
-connection.addEventListener("icecandidate", function l(candidate) {
-	debug("icecandidate", "candidate=", candidate);
-	if (candidate.candidate === null) {
-		connection.removeEventListener("icecandidate", l);
+connection.onicegatheringstatechange = (event) => {
+	debug("icegatheringstatechange", "event=", event);
+	if (connection.iceGatheringState === "complete") {
 		if (connection.localDescription === null) {
 			throw new Error(
 				"Impossible: connection.localDescription=null after " +
@@ -155,4 +154,4 @@ connection.addEventListener("icecandidate", function l(candidate) {
 			data: connection.localDescription,
 		});
 	}
-});
+};
