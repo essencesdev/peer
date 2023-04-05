@@ -1,7 +1,8 @@
 import { WindowElement } from "./window-element.js";
 
-class WebRtcVideoElement extends WindowElement {
+export class WebRtcVideoElement extends WindowElement {
 	#video: HTMLVideoElement;
+	#stream: MediaStream = new MediaStream();
 
 	constructor() {
 		super();
@@ -9,13 +10,19 @@ class WebRtcVideoElement extends WindowElement {
 		const style = document.createElement("style");
 		style.innerHTML = `
 			video {
-				width: 100%;
-				height: 100%;
+				margin: 16px;
 			}
 		`;
+		this.shadowRoot!.appendChild(style);
 
 		this.#video = document.createElement("video");
+		this.#video.srcObject = this.#stream;
+		this.#video.setAttribute("controls", "");
 		this.shadowRoot!.appendChild(this.#video);
+	}
+
+	addTrack(track: MediaStreamTrack) {
+		this.#stream.addTrack(track);
 	}
 }
 

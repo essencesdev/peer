@@ -16,11 +16,17 @@ interface MainDataChannelReady {
 }
 
 const configuration = {
-	iceServers: [{ urls: "stun:stun.services.mozilla.com:3478" }],
-	// iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+	iceServers: [
+		{
+			urls: [
+				"stun:stun.services.mozilla.com:3478",
+				"stun:stun.l.google.com:19302",
+			],
+		},
+	],
 };
 
-let connection = new RTCPeerConnection(configuration);
+export const connection = new RTCPeerConnection(configuration);
 let mainDataChannel: RTCDataChannel | null = null;
 let callback: Callback = console.log;
 

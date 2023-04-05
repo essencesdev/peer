@@ -2,18 +2,36 @@ import { debug } from "../logging.js";
 
 type ChannelListener = (d: Message, e: MessageEvent<any>) => void;
 
-type Message = TextMessage | VideoStreamMessage | IceCandidateMessage;
+type Message =
+	| TextMessage
+	| VideoStreamMessage
+	| IceCandidateMessage
+	| VideoStreamAcceptMessage
+	| VideoStreamDeclineMessage;
 interface TextMessage {
 	type: "text";
 	data: string;
 }
 interface VideoStreamMessage {
+	id: number;
 	type: "video";
+	data: RTCSessionDescriptionInit;
+}
+interface VideoStreamAcceptMessage {
+	id: number;
+	type: "video-accept";
+	data: RTCSessionDescriptionInit;
+}
+interface VideoStreamDeclineMessage {
+	id: number;
+	type: "video-decline";
 }
 interface IceCandidateMessage {
 	type: "ice-candidate";
 	data: RTCIceCandidate;
 }
+
+// currently we skip the data property check if the type is complex
 
 export function isValidIceCandidateMessage(
 	message: Message
@@ -23,8 +41,6 @@ export function isValidIceCandidateMessage(
 		typeof message === "object" &&
 		"type" in message &&
 		message.type === "ice-candidate"
-		// probably won't be because it's json stringified then parsed back out
-		// message.data instanceof RTCIceCandidate
 	);
 }
 
@@ -45,8 +61,36 @@ export function isValidVideoMessage(
 	return (
 		message !== null &&
 		typeof message === "object" &&
+		"id" in message &&
+		typeof message.id === "number" &&
 		"type" in message &&
 		message.type === "video"
+	);
+}
+
+export function isValidVideoAcceptMessage(
+	message: Message
+): message is VideoStreamAcceptMessage {
+	return (
+		message !== null &&
+		typeof message === "object" &&
+		"id" in message &&
+		typeof message.id === "number" &&
+		"type" in message &&
+		message.type === "video-accept"
+	);
+}
+
+export function isValidVideoDeclineMessage(
+	message: Message
+): message is VideoStreamDeclineMessage {
+	return (
+		message !== null &&
+		typeof message === "object" &&
+		"id" in message &&
+		typeof message.id === "number" &&
+		"type" in message &&
+		message.type === "video-decline"
 	);
 }
 

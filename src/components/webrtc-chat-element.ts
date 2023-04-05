@@ -1,5 +1,13 @@
 import { WindowElement } from "./window-element.js";
-import { send, listen, isValidTextMessage } from "../webrtc/messaging.js";
+import { receiveNewSdp } from "../webrtc/webrtc-core.js";
+import {
+	send,
+	listen,
+	isValidTextMessage,
+	isValidVideoMessage,
+	isValidVideoAcceptMessage,
+	isValidVideoDeclineMessage,
+} from "../webrtc/messaging.js";
 
 class WebRtcChatElement extends WindowElement {
 	#chatDisplay: HTMLDivElement;
@@ -141,6 +149,13 @@ class WebRtcChatElement extends WindowElement {
 		listen((message) => {
 			if (isValidTextMessage(message)) {
 				this.#appendToChat(false, message.data);
+			} else if (isValidVideoMessage(message)) {
+				this.#requestVideoStream(message.id, message.data);
+			} else if (isValidVideoAcceptMessage(message)) {
+				this.#appendToChat(false, "accepted your video request");
+				receiveNewSdp(message.data);
+			} else if (isValidVideoDeclineMessage(message)) {
+				this.#appendToChat(false, "declined your video request");
 			}
 		});
 	}
@@ -159,8 +174,39 @@ class WebRtcChatElement extends WindowElement {
 	#appendToChat(source: boolean, text: string) {
 		const p = document.createElement("p");
 		p.innerText = text;
-		p.classList.add(source ? "from-me" : "from-them");
-		p.classList.add("message");
+		p.classList.add(source ? "from-me" : "from-them", "message");
+
+		this.#chatDisplay.appendChild(p);
+		return p;
+	}
+
+	#requestVideoStream(id: number, data: RTCSessionDescriptionInit) {
+		const p = document.createElement("p");
+		p.innerText = "Would like to stream some video";
+		p.classList.add("from-them", "message");
+
+		const div = document.createElement("div");
+		const accept = document.createElement("button");
+		accept.innerText = "accept";
+		const decline = document.createElement("button");
+		decline.innerText = "decline";
+
+		accept.onclick = () => {
+			receiveNewSdp(data).then((sdp) => {
+				if (sdp) send({ id, type: "video-accept", data: sdp });
+			});
+			accept.setAttribute("disabled", "");
+			decline.setAttribute("disabled", "");
+		};
+		decline.onclick = () => {
+			send({ id, type: "video-decline" });
+			accept.setAttribute("disabled", "");
+			decline.setAttribute("disabled", "");
+		};
+
+		div.appendChild(accept);
+		div.appendChild(decline);
+		p.appendChild(div);
 
 		this.#chatDisplay.appendChild(p);
 		return p;
