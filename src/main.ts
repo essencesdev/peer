@@ -13,9 +13,13 @@ screenShare.onclick = () => {
 		// firefox can't return multiple tracks
 		.getDisplayMedia({ audio: true, video: true })
 		.then((stream) => {
+			const video = createVideoElement();
+
 			for (const track of stream.getTracks()) {
 				connection.addTrack(track);
+				video.addTrack(track);
 			}
+
 			return createNewSdp();
 		})
 		.then((sdp) => {
@@ -26,8 +30,13 @@ screenShare.onclick = () => {
 connection.addEventListener("track", (event) => {
 	debug("track", "event=", event);
 
-	const video = document.createElement("webrtc-video") as WebRtcVideoElement;
+	const video = createVideoElement();
 	video.addTrack(event.track);
-
-	mainSection.appendChild(video);
 });
+
+function createVideoElement():  WebRtcVideoElement {
+	const video = document.createElement("webrtc-video") as WebRtcVideoElement;
+	mainSection.appendChild(video);
+
+	return video;
+}
