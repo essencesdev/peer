@@ -57,7 +57,7 @@ screenShare.onclick = () => {
 		.getDisplayMedia({ audio: true, video: true })
 		.then((stream) => {
 			chat.appendMessageToChat(true, "requested to stream video");
-			const video = createVideoElement();
+			const video = createVideoElement(true);
 
 			for (const track of stream.getTracks()) {
 				connection.addTrack(track);
@@ -74,12 +74,13 @@ screenShare.onclick = () => {
 connection.addEventListener("track", (event) => {
 	debug("track", "event=", event);
 
-	const video = createVideoElement();
+	const video = createVideoElement(false);
 	video.addTrack(event.track);
 });
 
-function createVideoElement(): WebRtcVideoElement {
+function createVideoElement(source: boolean): WebRtcVideoElement {
 	const video = document.createElement("webrtc-video") as WebRtcVideoElement;
+	video.isSource = source;
 	mainSection.appendChild(video);
 
 	return video;
