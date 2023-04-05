@@ -34,7 +34,7 @@ connection.addEventListener("connectionstatechange", function l(event) {
 	debug("connectionstatechange", "event=", event);
 	if (connection.connectionState === "failed") {
 		errorNotificationElement.addErrorMessage(
-			"Connection State has changed to failed. Maybe refresh the page and try again?"
+			"Connection State has changed to failed. If this happens on the initial signal exchange, try again. Otherwise the other person may have just disconnected"
 		);
 	}
 });

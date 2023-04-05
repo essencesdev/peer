@@ -5,6 +5,7 @@ import {
 } from "./webrtc/webrtc-core.js";
 import { WebRtcMediaElement } from "./components/webrtc-media-element.js";
 import { WebRtcChatElement } from "./components/webrtc-chat-element.js";
+import { WebRtcTrackCommandsElement } from "./components/webrtc-track-commands-element.js";
 import {
 	send,
 	listen,
@@ -16,50 +17,25 @@ import {
 import { debug } from "./logging.js";
 
 const mainSection = document.getElementById("main-screen") as HTMLDivElement;
-const screenShare = document.getElementById(
-	"share-screen"
-) as HTMLButtonElement;
-const audioShare = document.getElementById("share-audio") as HTMLButtonElement;
+const mainTrackCommands = document.getElementById(
+	"main-webrtc-track-commands"
+) as WebRtcTrackCommandsElement;
+mainTrackCommands.onStreamSelected = (stream, id) => {
+	id ??= Date.now();
 
-screenShare.onclick = () => {
-	navigator.mediaDevices
-		// these seem to be video only
-		// so TODO: add ability to add audio track to thing
-		.getDisplayMedia({ audio: false, video: true })
-		.then((stream) => {
-			chat.appendMessageToChat(true, "requested to stream media");
-			const media = createMediaElement(true);
+	chat.appendMessageToChat(true, "requested to stream media");
+	const media = createMediaElement(true);
+	const trackIds: string[] = [];
 
-			for (const track of stream.getTracks()) {
-				connection.addTrack(track);
-				media.addTrack(track);
-			}
+	for (const track of stream.getTracks()) {
+		connection.addTrack(track);
+		media.addTrack(track);
+		trackIds.push(track.id);
+	}
 
-			return createNewSdp();
-		})
-		.then((sdp) => {
-			send({ id: Date.now(), type: "media", data: sdp });
-		});
-};
-
-audioShare.onclick = () => {
-	navigator.mediaDevices
-		// we need to alternate these arguments to share individual things
-		.getUserMedia({ audio: true, video: false })
-		.then((stream) => {
-			chat.appendMessageToChat(true, "requested to stream media");
-			const media = createMediaElement(true);
-
-			for (const track of stream.getTracks()) {
-				connection.addTrack(track);
-				media.addTrack(track);
-			}
-
-			return createNewSdp();
-		})
-		.then((sdp) => {
-			send({ id: Date.now(), type: "media", data: sdp });
-		});
+	createNewSdp().then((sdp) => {
+		send({ id: id!, type: "media", data: sdp, trackIds });
+	});
 };
 
 const chat = document.getElementById("webrtc-chat") as WebRtcChatElement;

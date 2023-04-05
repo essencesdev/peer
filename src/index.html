@@ -12,10 +12,9 @@
 	<body>
 		<section id="main-screen" class="full-screen">
 			<webrtc-chat id="webrtc-chat" data-cant-close></webrtc-chat>
-			<div id="commands">
-				<button id="share-screen">Share Screen</button>
-				<button id="share-audio">Share Audio</button>
-			</div>
+			<webrtc-track-commands
+				id="main-webrtc-track-commands"
+			></webrtc-track-commands>
 		</section>
 		<section id="connection-screen" class="full-screen fully-centered">
 			<div class="circle-container fully-centered">
@@ -42,6 +41,10 @@
 		></script>
 		<script type="module" src="components/webrtc-chat-element.js"></script>
 		<script type="module" src="components/webrtc-media-element.js"></script>
+		<script
+			type="module"
+			src="components/webrtc-track-commands-element.js"
+		></script>
 		<script type="module" src="connection.js"></script>
 		<script type="module" src="main.js"></script>
 	</body>

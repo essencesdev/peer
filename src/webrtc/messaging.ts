@@ -16,6 +16,7 @@ interface MediaStreamMessage {
 	id: number;
 	type: "media";
 	data: RTCSessionDescriptionInit;
+	trackIds: string[];
 }
 interface MediaStreamAcceptMessage {
 	id: number;
@@ -64,7 +65,8 @@ export function isValidMediaMessage(
 		"id" in message &&
 		typeof message.id === "number" &&
 		"type" in message &&
-		message.type === "media"
+		message.type === "media" &&
+		Array.isArray(message.trackIds)
 	);
 }
 

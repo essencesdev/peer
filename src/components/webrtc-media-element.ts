@@ -3,7 +3,6 @@ import { WindowElement } from "./window-element.js";
 export class WebRtcMediaElement extends WindowElement {
 	#video: HTMLVideoElement;
 	#stream: MediaStream = new MediaStream();
-
 	#_isSource: boolean = true;
 
 	constructor() {
