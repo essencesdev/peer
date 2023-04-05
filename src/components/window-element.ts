@@ -21,6 +21,17 @@ export class WindowElement extends ShadowedWithStylesheetElement {
 				flex: 0 0 32px;
 				background: var(--grey-1);
 				cursor: grab;
+				display: flex;
+				align-items: center;
+				padding-left: 8px;
+			}
+			.close-button {
+				width: 16px;
+				height: 16px;
+				border-radius: 100%;
+				background-color: var(--red-1);
+				border: none;
+				cursor: pointer;
 			}
 		`;
 
@@ -28,6 +39,18 @@ export class WindowElement extends ShadowedWithStylesheetElement {
 
 		const windowHeader = document.createElement("div");
 		windowHeader.classList.add("window-header");
+
+		if (!this.hasAttribute("data-cant-close")) {
+			const closeButton = document.createElement("button");
+			closeButton.classList.add("close-button");
+
+			closeButton.onclick = (event) => {
+				event.preventDefault();
+
+				this.parentNode?.removeChild(this);
+			};
+			windowHeader.appendChild(closeButton);
+		}
 
 		windowHeader.onmousedown = (event) => {
 			event.preventDefault();
