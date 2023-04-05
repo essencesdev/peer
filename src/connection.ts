@@ -7,6 +7,8 @@ import {
 
 import { errorNotificationElement } from "./components/error-notification-element.js";
 
+declare const QRCode: any;
+
 const s = document.getElementById("signal") as HTMLTextAreaElement;
 const cs = document.getElementById("create-signal") as HTMLButtonElement;
 const rs = document.getElementById("receive-signal") as HTMLButtonElement;
