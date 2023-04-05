@@ -1,4 +1,5 @@
 import { ShadowedWithStylesheetElement } from "./shadowed-with-stylesheet-element.js";
+import { errorNotificationElement } from "./error-notification-element.js";
 
 export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 	onStreamSelected: ((stream: MediaStream) => void) | null = null;
@@ -6,6 +7,24 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 
 	constructor() {
 		super();
+		const style = document.createElement("style");
+		style.innerHTML = `
+			.icon-button {
+				width: 50px;
+				height: 50px;
+				font-size: 25px;
+			}
+			.screen-icon::after {
+				content: "💻";
+			}
+			.microphone-icon::after {
+				content: "🎤";
+			}
+			.video-icon::after {
+				content: "🎥";
+			}
+		`;
+		this.shadowRoot!.appendChild(style);
 
 		const button = document.createElement("button");
 		button.innerText = "add stream";
@@ -16,18 +35,20 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 			const p = document.createElement("p");
 			p.innerText = "The dialog";
 			dialog.appendChild(p);
-			document.body.appendChild(dialog);
-			const cleanup = () => document.body.removeChild(dialog);
+			this.shadowRoot!.appendChild(dialog);
+			const cleanup = () => this.shadowRoot!.removeChild(dialog);
 			const screenShare = document.createElement("button");
-			screenShare.innerText = "screen";
+			screenShare.classList.add("icon-button", "screen-icon");
 			const audioShare = document.createElement("button");
-			audioShare.innerText = "audio";
+			audioShare.classList.add("icon-button", "microphone-icon");
 			const videoShare = document.createElement("button");
-			videoShare.innerText = "video";
+			videoShare.classList.add("icon-button", "video-icon");
 
 			dialog.appendChild(screenShare);
 			dialog.appendChild(audioShare);
 			dialog.appendChild(videoShare);
+
+			dialog.onclose = () => cleanup();
 
 			screenShare.onclick = () => {
 				navigator.mediaDevices
@@ -37,7 +58,7 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 							this.onStreamSelected(stream);
 					})
 					.then(() => dialog.close())
-					.finally(() => cleanup());
+					.catch(e => errorNotificationElement.addError(e));
 			};
 
 			audioShare.onclick = () => {
@@ -48,7 +69,7 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 							this.onStreamSelected(stream);
 					})
 					.then(() => dialog.close())
-					.finally(() => cleanup());
+					.catch(e => errorNotificationElement.addError(e));
 			};
 
 			videoShare.onclick = () => {
@@ -59,7 +80,7 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 							this.onStreamSelected(stream);
 					})
 					.then(() => dialog.close())
-					.finally(() => cleanup());
+					.catch(e => errorNotificationElement.addError(e));
 			};
 
 			dialog.showModal();

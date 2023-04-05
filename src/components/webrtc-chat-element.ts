@@ -91,6 +91,7 @@ export class WebRtcChatElement extends WindowElement {
 			}
 			#chat-send::after {
 				content: "✉";
+				font-size: calc(var(--chat-send-size) / 2);
 			}
 		`;
 		this.shadowRoot!.appendChild(style);
