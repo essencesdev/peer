@@ -1,6 +1,8 @@
 import { ShadowedWithStylesheetElement } from "./shadowed-with-stylesheet-element.js";
 
 export class WindowElement extends ShadowedWithStylesheetElement {
+	onClose: ((self: this) => void) | null = null;
+
 	constructor() {
 		super();
 
@@ -16,6 +18,7 @@ export class WindowElement extends ShadowedWithStylesheetElement {
 				overflow: auto;
 				display: flex;
 				flex-direction: column;
+				background: var(--bg);
 			}
 			.window-header {
 				flex: 0 0 32px;
@@ -46,6 +49,8 @@ export class WindowElement extends ShadowedWithStylesheetElement {
 
 			closeButton.onclick = (event) => {
 				event.preventDefault();
+
+				if (this.onClose) this.onClose(this);
 
 				this.parentNode?.removeChild(this);
 			};

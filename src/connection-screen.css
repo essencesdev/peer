@@ -1,7 +1,3 @@
-* {
-	box-sizing: border-box;
-}
-
 :root {
 	--connection-screen-width: 500px;
 	--main-sizing: 16px;
@@ -16,12 +12,6 @@
 	top: 0;
 	background: var(--bg);
 	color: var(--fg);
-}
-
-.fully-centered {
-	display: flex;
-	justify-content: center;
-	align-items: center;
 }
 
 #description {

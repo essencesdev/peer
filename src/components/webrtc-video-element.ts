@@ -19,6 +19,12 @@ export class WebRtcVideoElement extends WindowElement {
 		this.#video.srcObject = this.#stream;
 		this.#video.setAttribute("controls", "");
 		this.shadowRoot!.appendChild(this.#video);
+
+		this.onClose = () => {
+			for (const track of this.#stream.getTracks()) {
+				track.stop();
+			}
+		};
 	}
 
 	addTrack(track: MediaStreamTrack) {
