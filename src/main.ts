@@ -20,21 +20,22 @@ const mainSection = document.getElementById("main-screen") as HTMLDivElement;
 const mainTrackCommands = document.getElementById(
 	"main-webrtc-track-commands"
 ) as WebRtcTrackCommandsElement;
-mainTrackCommands.onStreamSelected = (stream, id) => {
-	id ??= Date.now();
+mainTrackCommands.onStreamSelected = (stream) => {
+	// unused atm, is there a way to signal certain tracks should be combined?
+	// track ids are different between peers
+	// nothing in track.settings
+	const id = 1;
 
 	chat.appendMessageToChat(true, "requested to stream media");
 	const media = createMediaElement(true);
-	const trackIds: string[] = [];
 
 	for (const track of stream.getTracks()) {
 		connection.addTrack(track);
 		media.addTrack(track);
-		trackIds.push(track.id);
 	}
 
 	createNewSdp().then((sdp) => {
-		send({ id: id!, type: "media", data: sdp, trackIds });
+		send({ id, type: "media", data: sdp, trackIds: [] });
 	});
 };
 
@@ -68,9 +69,6 @@ listen((message) => {
 		chat.appendMessageToChat(false, "declined your media request");
 	}
 });
-
-// we can save elements by id, then apply track to specific elements
-// based on the id of the media message
 
 connection.addEventListener("track", (event) => {
 	debug("track", "event=", event);
