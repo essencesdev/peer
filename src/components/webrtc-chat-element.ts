@@ -1,11 +1,10 @@
-import { ShadowedWithStylesheetElement } from "./shadowed-with-stylesheet-element.js";
+import { WindowElement } from "./window-element.js";
 import { send, listen, isValidTextMessage } from "../webrtc/messaging.js";
 
-class WebRtcChatElement extends ShadowedWithStylesheetElement {
+class WebRtcChatElement extends WindowElement {
 	#chatDisplay: HTMLDivElement;
 	#chatInput: HTMLTextAreaElement;
 	#chatSend: HTMLButtonElement;
-	#chatHeader: HTMLDivElement;
 	#chatInputContainer: HTMLDivElement;
 
 	constructor() {
@@ -14,16 +13,6 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 		const style = document.createElement("style");
 		style.innerHTML = `
 			:host {
-				position: absolute;
-				display: block;
-				width: 50%;
-				height: 50%;
-				border: 1px solid var(--grey-2);
-				resize: both;
-				overflow: auto;
-				display: flex;
-				flex-direction: column;
-
 				--chat-send-size: 40px;
 				--chat-send-padding: 5px;
 				--base-sizing: 16px;
@@ -61,11 +50,6 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 			}
 			.message {
 				padding: var(--base-sizing);
-			}
-			#chat-header {
-				flex: 0 0 calc(var(--base-sizing) * 2);
-				background: var(--grey-1);
-				cursor: grab;
 			}
 			#chat-container {
 				flex: 1 1;
@@ -110,9 +94,6 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 		`;
 		this.shadowRoot!.appendChild(style);
 
-		this.#chatHeader = document.createElement("div");
-		this.#chatHeader.id = "chat-header";
-
 		const chatContainer = document.createElement("div");
 		chatContainer.id = "chat-container";
 
@@ -124,7 +105,6 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 		this.#chatInputContainer.id = "chat-input-container";
 		this.#chatInputContainer.classList.add("text");
 
-		this.shadowRoot!.appendChild(this.#chatHeader);
 		this.shadowRoot!.appendChild(chatContainer);
 
 		chatContainer.appendChild(this.#chatDisplay);
@@ -163,28 +143,6 @@ class WebRtcChatElement extends ShadowedWithStylesheetElement {
 				this.#appendToChat(false, message.data);
 			}
 		});
-
-		// draggable window
-		this.#chatHeader.onmousedown = (event) => {
-			event.preventDefault();
-
-			let initX = event.clientX;
-			let initY = event.clientY;
-
-			document.onmouseup = () => {
-				document.onmousemove = null;
-				document.onmouseup = null;
-			};
-
-			document.onmousemove = (event) => {
-				const dX = event.clientX - initX;
-				const dY = event.clientY - initY;
-				initX = event.clientX;
-				initY = event.clientY;
-				this.style.left = `${this.offsetLeft + dX}px`;
-				this.style.top = `${this.offsetTop + dY}px`;
-			};
-		};
 	}
 
 	#onTextChanged() {

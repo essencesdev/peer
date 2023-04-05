@@ -1,7 +1,7 @@
 import { ShadowedWithStylesheetElement } from "./shadowed-with-stylesheet-element.js";
 import { error } from "../logging.js";
 
-export class ErrorNotificationElement extends ShadowedWithStylesheetElement {
+class ErrorNotificationElement extends ShadowedWithStylesheetElement {
 	constructor() {
 		super();
 
