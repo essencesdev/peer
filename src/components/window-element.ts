@@ -1,5 +1,7 @@
 import { ShadowedWithStylesheetElement } from "./shadowed-with-stylesheet-element.js";
 
+let zIndexHack = 1;
+
 export class WindowElement extends ShadowedWithStylesheetElement {
 	onClose: ((self: this) => void) | null = null;
 
@@ -59,6 +61,8 @@ export class WindowElement extends ShadowedWithStylesheetElement {
 
 		windowHeader.onmousedown = (event) => {
 			event.preventDefault();
+
+			this.style.zIndex = String(zIndexHack++);
 
 			let initX = event.clientX;
 			let initY = event.clientY;
