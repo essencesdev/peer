@@ -16,7 +16,6 @@ import {
 } from "./webrtc/messaging.js";
 import { debug } from "./logging.js";
 
-const mainSection = document.getElementById("main-screen") as HTMLDivElement;
 const mainTrackCommands = document.getElementById(
 	"main-webrtc-track-commands"
 ) as WebRtcTrackCommandsElement;
@@ -80,7 +79,7 @@ connection.addEventListener("track", (event) => {
 function createMediaElement(source: boolean): WebRtcMediaElement {
 	const media = document.createElement("webrtc-media") as WebRtcMediaElement;
 	media.isSource = source;
-	mainSection.appendChild(media);
+	document.body.appendChild(media);
 
 	return media;
 }
