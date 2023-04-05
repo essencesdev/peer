@@ -1,19 +1,12 @@
 import { WindowElement } from "./window-element.js";
-import { receiveNewSdp } from "../webrtc/webrtc-core.js";
-import {
-	send,
-	listen,
-	isValidTextMessage,
-	isValidVideoMessage,
-	isValidVideoAcceptMessage,
-	isValidVideoDeclineMessage,
-} from "../webrtc/messaging.js";
 
-class WebRtcChatElement extends WindowElement {
+export class WebRtcChatElement extends WindowElement {
 	#chatDisplay: HTMLDivElement;
 	#chatInput: HTMLTextAreaElement;
 	#chatSend: HTMLButtonElement;
 	#chatInputContainer: HTMLDivElement;
+
+	onSend: ((message: string) => void) | null = null;
 
 	constructor() {
 		super();
@@ -132,38 +125,23 @@ class WebRtcChatElement extends WindowElement {
 
 		// send message
 		this.#chatSend.onclick = () => {
-			const text = this.#chatInput.value;
-			// style this if send fails
-			const p = this.#appendToChat(true, text);
+			if (this.onSend) this.onSend(this.#chatInput.value);
 			this.#chatInput.value = "";
-			this.#onTextChanged();
-			send({ type: "text", data: text });
+			this.#scrollToBottom();
 		};
 
 		// scale text area and other checks
 		this.#chatInput.onkeyup = this.#chatInput.onkeydown = () => {
-			this.#onTextChanged();
+			this.#enableDisableSend();
+			this.#scaleChatInput();
 		};
-
-		// receive messages
-		listen((message) => {
-			if (isValidTextMessage(message)) {
-				this.#appendToChat(false, message.data);
-			} else if (isValidVideoMessage(message)) {
-				this.#requestVideoStream(message.id, message.data);
-			} else if (isValidVideoAcceptMessage(message)) {
-				this.#appendToChat(false, "accepted your video request");
-				receiveNewSdp(message.data);
-			} else if (isValidVideoDeclineMessage(message)) {
-				this.#appendToChat(false, "declined your video request");
-			}
-		});
 	}
 
-	#onTextChanged() {
-		if (this.#chatInput.value.length === 0)
-			this.#chatSend.setAttribute("disabled", String(true));
-		else this.#chatSend.removeAttribute("disabled");
+	#scrollToBottom() {
+		this.#chatDisplay.scrollTop = this.#chatDisplay.scrollHeight;
+	}
+
+	#scaleChatInput() {
 		this.#chatInput.style.height = "auto";
 		this.#chatInput.style.height = `${this.#chatInput.scrollHeight}px`;
 		this.#chatInputContainer.style.height = `${
@@ -171,18 +149,34 @@ class WebRtcChatElement extends WindowElement {
 		}px`;
 	}
 
-	#appendToChat(source: boolean, text: string) {
+	#enableDisableSend() {
+		if (this.#chatInput.value.length === 0)
+			this.#chatSend.setAttribute("disabled", String(true));
+		else this.#chatSend.removeAttribute("disabled");
+	}
+
+	appendMessageToChat(source: boolean, text: string) {
 		const p = document.createElement("p");
 		p.innerText = text;
 		p.classList.add(source ? "from-me" : "from-them", "message");
 
-		this.#chatDisplay.appendChild(p);
+		this.appendElementToChat(p);
 		return p;
 	}
 
-	#requestVideoStream(id: number, data: RTCSessionDescriptionInit) {
+	appendElementToChat(e: HTMLElement) {
+		this.#chatDisplay.appendChild(e);
+		this.#scrollToBottom();
+		return e;
+	}
+
+	appendRequestToChat(
+		msg: string,
+		onAccept: () => void,
+		onDecline: () => void
+	) {
 		const p = document.createElement("p");
-		p.innerText = "Would like to stream some video";
+		p.innerText = msg;
 		p.classList.add("from-them", "message");
 
 		const div = document.createElement("div");
@@ -192,14 +186,12 @@ class WebRtcChatElement extends WindowElement {
 		decline.innerText = "decline";
 
 		accept.onclick = () => {
-			receiveNewSdp(data).then((sdp) => {
-				if (sdp) send({ id, type: "video-accept", data: sdp });
-			});
+			onAccept();
 			accept.setAttribute("disabled", "");
 			decline.setAttribute("disabled", "");
 		};
 		decline.onclick = () => {
-			send({ id, type: "video-decline" });
+			onDecline();
 			accept.setAttribute("disabled", "");
 			decline.setAttribute("disabled", "");
 		};
@@ -208,7 +200,7 @@ class WebRtcChatElement extends WindowElement {
 		div.appendChild(decline);
 		p.appendChild(div);
 
-		this.#chatDisplay.appendChild(p);
+		this.appendElementToChat(p);
 		return p;
 	}
 }
