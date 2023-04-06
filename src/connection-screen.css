@@ -55,8 +55,9 @@
 
 #controls {
 	display: flex;
-	width: var(--connection-screen-width);
 	justify-content: space-around;
+	align-items: center;
+	width: var(--connection-screen-width);
 }
 
 #signal[disabled] {
