@@ -11,6 +11,7 @@ class ErrorNotificationElement extends ShadowedWithStylesheetElement {
 				position: absolute;
 				display: block;
 				z-index: 100;
+				pointer-events: none;
 			}
 			* {
 				box-sizing: border-box;
@@ -26,6 +27,7 @@ class ErrorNotificationElement extends ShadowedWithStylesheetElement {
 				border-radius: 0 4px 4px 0;
 				cursor: pointer;
 				display: block;
+				pointer-events: auto;
 			}
 			.error-message::after {
 				display: inline-block;
