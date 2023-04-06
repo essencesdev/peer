@@ -25,13 +25,19 @@ setState({
 	callback: ({ type, data }) => {
 		switch (type) {
 			case "CandidatesReady":
+				const { sdp, state } = data;
 				setTimeout(() => {
+					if (state === "connecting") {
+						onLoadingFinished("Now copy this text to the other instance " +
+										  "or scan the QR code so it opens the link on the same page of the other instance");
+						rs.setAttribute("hidden", "");
+					} else {
 					onLoadingFinished(
 						"Copy this text to the other instance. " +
-							"If copying a code into this, replace the existing code and press the button. " +
-							"For QR codes, make sure the url is opened on the same page."
+							"If copying text into this, replace the existing text and press the button."
 					);
-					s.value = compress(data);
+					}
+					s.value = compress(sdp);
 					try {
 						const url = new URL(document.URL);
 						url.hash = s.value;

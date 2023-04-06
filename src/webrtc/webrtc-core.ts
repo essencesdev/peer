@@ -3,11 +3,13 @@ import { init, send, listen, isValidIceCandidateMessage } from "./messaging.js";
 import { errorNotificationElement } from "../components/error-notification-element.js";
 
 type Callback = (c: CallbackData) => void;
-type CallbackData = CandidatesReady | MainDataChannelReady;
+type CallbackData =
+	| CandidatesReady
+	| MainDataChannelReady;
 
 interface CandidatesReady {
 	type: "CandidatesReady";
-	data: RTCSessionDescription;
+	data: { sdp: RTCSessionDescription, state: RTCPeerConnectionState };
 }
 
 interface MainDataChannelReady {
@@ -117,11 +119,38 @@ export function initializeEverything() {
 		}
 	});
 	// also clean up other listeners
-	connection.onicegatheringstatechange = null;
+	connection.removeEventListener(
+		"icegatheringstatechange",
+		initOnIceGatherStateChange
+	);
+	connection.removeEventListener("datachannel", initOnDataChannel);
 }
 
-connection.addEventListener("datachannel", function l(event) {
-	connection.removeEventListener("datachannel", l);
+function initOnIceGatherStateChange(event: Event) {
+	debug("initOnIceGatheringStateChange", "event=", event);
+	if (connection.iceGatheringState === "complete") {
+		if (connection.localDescription === null) {
+			throw new Error(
+				"Impossible: connection.localDescription=null after " +
+					"gathering candidates"
+			);
+		}
+		callback({
+			type: "CandidatesReady",
+			data: {
+				sdp: connection.localDescription,
+				state: connection.connectionState,
+			},
+		});
+	}
+}
+connection.addEventListener(
+	"icegatheringstatechange",
+	initOnIceGatherStateChange
+);
+
+function initOnDataChannel(event: RTCDataChannelEvent) {
+	debug("initOnDataChannel", "event=", event);
 	const originalMainDataChannel = mainDataChannel;
 	if (mainDataChannel === null) mainDataChannel = event.channel;
 	debug(
@@ -138,20 +167,5 @@ connection.addEventListener("datachannel", function l(event) {
 		type: "MainDataChannelReady",
 		data: mainDataChannel!,
 	});
-});
-
-connection.onicegatheringstatechange = (event) => {
-	debug("icegatheringstatechange", "event=", event);
-	if (connection.iceGatheringState === "complete") {
-		if (connection.localDescription === null) {
-			throw new Error(
-				"Impossible: connection.localDescription=null after " +
-					"gathering candidates"
-			);
-		}
-		callback({
-			type: "CandidatesReady",
-			data: connection.localDescription,
-		});
-	}
-};
+}
+connection.addEventListener("datachannel", initOnDataChannel);
