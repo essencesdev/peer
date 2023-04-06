@@ -93,6 +93,7 @@ export async function createSignal(): Promise<RTCSessionDescriptionInit> {
 	mainDataChannel = connection.createDataChannel("core-channel");
 	init(mainDataChannel);
 	mainDataChannel.onopen = () => {
+		debug("mainDataChannel.onopen");
 		callback({
 			type: "MainDataChannelReady",
 			data: mainDataChannel!,
@@ -102,7 +103,10 @@ export async function createSignal(): Promise<RTCSessionDescriptionInit> {
 }
 
 export async function receiveSignal(signal: RTCSessionDescriptionInit) {
-	if (signal.type === "offer") mainDataChannel = null;
+	if (signal.type === "offer" && mainDataChannel !== null) {
+		mainDataChannel.onopen = null;
+		mainDataChannel = null;
+	}
 	return receiveNewSdp(signal);
 }
 
