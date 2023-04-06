@@ -20,6 +20,12 @@
 	font-size: var(--main-sizing);
 }
 
+#directions {
+	width: var(--connection-screen-width);
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: var(--main-sizing);
+}
+
 #main-screen {
 	padding: var(--main-sizing);
 }

@@ -3,13 +3,11 @@ import { init, send, listen, isValidIceCandidateMessage } from "./messaging.js";
 import { errorNotificationElement } from "../components/error-notification-element.js";
 
 type Callback = (c: CallbackData) => void;
-type CallbackData =
-	| CandidatesReady
-	| MainDataChannelReady;
+type CallbackData = CandidatesReady | MainDataChannelReady;
 
 interface CandidatesReady {
 	type: "CandidatesReady";
-	data: { sdp: RTCSessionDescription, state: RTCPeerConnectionState };
+	data: { sdp: RTCSessionDescription; state: RTCPeerConnectionState };
 }
 
 interface MainDataChannelReady {

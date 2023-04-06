@@ -9,7 +9,7 @@ import { errorNotificationElement } from "./components/error-notification-elemen
 
 declare const QRCode: any;
 
-const d = document.getElementById("description") as HTMLParagraphElement;
+const d = document.getElementById("directions") as HTMLParagraphElement;
 const s = document.getElementById("signal") as HTMLTextAreaElement;
 const rs = document.getElementById("receive-signal") as HTMLButtonElement;
 const cl = document.getElementById("code-loader") as HTMLDivElement;
@@ -28,14 +28,16 @@ setState({
 				const { sdp, state } = data;
 				setTimeout(() => {
 					if (state === "connecting") {
-						onLoadingFinished("Now copy this text to the other instance " +
-										  "or scan the QR code so it opens the link on the same page of the other instance");
+						onLoadingFinished(
+							"Now copy this text to the other instance " +
+								"or scan the QR code so it opens the link on the same page of the other instance"
+						);
 						rs.setAttribute("hidden", "");
 					} else {
-					onLoadingFinished(
-						"Copy this text to the other instance. " +
-							"If copying text into this, replace the existing text and press the button."
-					);
+						onLoadingFinished(
+							"Copy this text to the other instance. " +
+								"If copying text into this, replace the existing text and press the button."
+						);
 					}
 					s.value = compress(sdp);
 					try {
