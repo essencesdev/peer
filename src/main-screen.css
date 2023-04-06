@@ -1,3 +1,7 @@
-webrtc-chat {
-	top: 300px;
+#main-webrtc-track-commands {
+	position: fixed;
+	margin-left: 32px;
+	margin-top: 32px;
+	left: 0;
+	top: 0;
 }
