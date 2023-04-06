@@ -15,11 +15,11 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 				border: 1px solid var(--grey-2);
 				background: var(--bg);
 				color: var(--fg);
-								font-family: Verdana, Geneva, Tahoma, sans-serif;
+				font-family: Verdana, Geneva, Tahoma, sans-serif;
 				font-size: 16px;
 			}
 			.button-container {
-display: flex;
+				display: flex;
 				justify-content: space-evenly;
 			}
 			.icon-button {
