@@ -25,7 +25,7 @@ mainTrackCommands.onStreamSelected = (stream) => {
 	// nothing in track.settings
 	const id = 1;
 
-	chat.appendMessageToChat(true, "requested to stream media");
+	chat.appendMessageToChat(true, "requested to stream media", true);
 	const media = createMediaElement(true);
 
 	for (const track of stream.getTracks()) {
@@ -40,13 +40,13 @@ mainTrackCommands.onStreamSelected = (stream) => {
 
 const chat = document.getElementById("webrtc-chat") as WebRtcChatElement;
 chat.onSend = (message) => {
-	chat.appendMessageToChat(true, message);
+	chat.appendMessageToChat(true, message, false);
 	send({ type: "text", data: message });
 };
 
 listen((message) => {
 	if (isValidTextMessage(message)) {
-		chat.appendMessageToChat(false, message.data);
+		chat.appendMessageToChat(false, message.data, false);
 	} else if (isValidMediaMessage(message)) {
 		chat.appendRequestToChat(
 			"would like to stream media",
@@ -62,10 +62,10 @@ listen((message) => {
 			() => send({ id: message.id, type: "media-decline" })
 		);
 	} else if (isValidMediaAcceptMessage(message)) {
-		chat.appendMessageToChat(false, "accepted your media request");
+		chat.appendMessageToChat(false, "accepted your media request", true);
 		receiveNewSdp(message.data);
 	} else if (isValidMediaDeclineMessage(message)) {
-		chat.appendMessageToChat(false, "declined your media request");
+		chat.appendMessageToChat(false, "declined your media request", true);
 	}
 });
 

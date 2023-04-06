@@ -17,6 +17,7 @@ export class WebRtcChatElement extends WindowElement {
 				--chat-send-size: 40px;
 				--chat-send-padding: 5px;
 				--base-sizing: 16px;
+				--system-font-size: 80%;
 			}
 			* {
 				box-sizing: border-box;
@@ -27,6 +28,9 @@ export class WebRtcChatElement extends WindowElement {
 				background: var(--grey-1);
 				color: var(--fg);
 			}
+			.system-text {
+				font-family: monospace, monospace;
+			}
 			.from-me {
 				color: var(--blue-1);
 				text-align: right;
@@ -36,7 +40,7 @@ export class WebRtcChatElement extends WindowElement {
 			.from-me::before {
 				content: "You";
 				display: block;
-				font-size: 80%;
+				font-size: var(--system-font-size);
 			}
 			.from-them {
 				color: var(--orange-1);
@@ -47,7 +51,7 @@ export class WebRtcChatElement extends WindowElement {
 			.from-them::before {
 				content: "Them";
 				display: block;
-				font-size: 80%;
+				font-size: var(--system-font-size);
 			}
 			.message {
 				padding: var(--base-sizing);
@@ -93,6 +97,11 @@ export class WebRtcChatElement extends WindowElement {
 				content: "✉";
 				font-size: calc(var(--chat-send-size) / 2);
 			}
+			.buttons-container {
+				margin-top: 5px;
+				display: flex;
+				gap: 15px;
+			}
 		`;
 		this.shadowRoot!.appendChild(style);
 
@@ -101,11 +110,9 @@ export class WebRtcChatElement extends WindowElement {
 
 		this.#chatDisplay = document.createElement("div");
 		this.#chatDisplay.id = "chat-display";
-		this.#chatDisplay.classList.add("text");
 
 		this.#chatInputContainer = document.createElement("div");
 		this.#chatInputContainer.id = "chat-input-container";
-		this.#chatInputContainer.classList.add("text");
 
 		this.shadowRoot!.appendChild(chatContainer);
 
@@ -156,10 +163,14 @@ export class WebRtcChatElement extends WindowElement {
 		else this.#chatSend.removeAttribute("disabled");
 	}
 
-	appendMessageToChat(source: boolean, text: string) {
+	appendMessageToChat(source: boolean, text: string, system: boolean) {
 		const p = document.createElement("p");
 		p.innerText = text;
-		p.classList.add(source ? "from-me" : "from-them", "message");
+		p.classList.add(
+			source ? "from-me" : "from-them",
+			system ? "system-text" : "text",
+			"message"
+		);
 
 		this.appendElementToChat(p);
 		return p;
@@ -178,9 +189,10 @@ export class WebRtcChatElement extends WindowElement {
 	) {
 		const p = document.createElement("p");
 		p.innerText = msg;
-		p.classList.add("from-them", "message");
+		p.classList.add("from-them", "system-text", "message");
 
 		const div = document.createElement("div");
+		div.classList.add("buttons-container");
 		const accept = document.createElement("button");
 		accept.innerText = "accept";
 		const decline = document.createElement("button");
