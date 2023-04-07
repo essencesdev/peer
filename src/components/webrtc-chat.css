@@ -1,0 +1,89 @@
+:host {
+	--chat-send-size: 40px;
+	--chat-send-padding: 10px;
+	--base-sizing: 16px;
+	--system-font-size: 80%;
+}
+* {
+	box-sizing: border-box;
+}
+.text {
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 16px;
+	background: var(--grey-1);
+	color: var(--fg);
+}
+.system-text {
+	font-family: monospace, monospace;
+}
+.from-me {
+	color: var(--blue-1);
+	text-align: right;
+	margin-left: 25%;
+	border-right: 3px solid var(--blue-2);
+}
+.from-me::before {
+	content: "You";
+	display: block;
+	font-size: var(--system-font-size);
+}
+.from-them {
+	color: var(--orange-1);
+	text-align: left;
+	margin-right: 25%;
+	border-left: 3px solid var(--orange-2);
+}
+.from-them::before {
+	content: "Them";
+	display: block;
+	font-size: var(--system-font-size);
+}
+.message {
+	padding: var(--base-sizing);
+}
+#chat-container {
+	flex: 1 1;
+	display: flex;
+	flex-direction: column;
+	overflow: auto;
+}
+#chat-display {
+	flex: 1 1 80%;
+	margin: var(--base-sizing);
+	padding: var(--base-sizing);
+	overflow: auto;
+	word-break: break-all;
+}
+#chat-input-container {
+	flex: 0 0;
+	margin: var(--base-sizing);
+	margin-top: 0px; /* why no collapse */
+	height: calc(var(--chat-send-size) + var(--chat-send-padding) * 2);
+	position: relative;
+}
+#chat-input {
+	height: 100%;
+	width: 100%;
+	border: none;
+	outline: none;
+	margin: 0;
+	padding: var(--chat-send-padding);
+	padding-left: calc(var(--chat-send-size) + var(--chat-send-padding) * 2);
+	resize: none;
+}
+#chat-send {
+	position: absolute;
+	left: var(--chat-send-padding);
+	top: var(--chat-send-padding);
+	width: var(--chat-send-size);
+	height: var(--chat-send-size);
+}
+#chat-send::after {
+	content: "✉";
+	font-size: calc(var(--chat-send-size) / 2);
+}
+.buttons-container {
+	margin-top: 5px;
+	display: flex;
+	gap: 15px;
+}

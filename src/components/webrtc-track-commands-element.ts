@@ -9,45 +9,22 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 
 	constructor() {
 		super();
-		const style = document.createElement("style");
-		style.innerHTML = `
-			dialog {
-				border: 1px solid var(--grey-2);
-				background: var(--bg);
-				color: var(--fg);
-				font-family: Verdana, Geneva, Tahoma, sans-serif;
-				font-size: 16px;
-			}
-			.button-container {
-				display: flex;
-				justify-content: space-evenly;
-			}
-			.icon-button {
-				width: 50px;
-				height: 50px;
-				font-size: 25px;
-			}
-			.screen-icon::after {
-				content: "💻";
-			}
-			.microphone-icon::after {
-				content: "🎤";
-			}
-			.video-icon::after {
-				content: "🎥";
-			}
-		`;
-		this.shadowRoot!.appendChild(style);
+
+		const styleSheet = document.createElement("link");
+		styleSheet.rel = "stylesheet";
+		styleSheet.href = "components/webrtc-track-commands.css";
+		this.shadowRoot!.appendChild(styleSheet);
 
 		const button = document.createElement("button");
-		button.innerText = "add stream";
+		button.classList.add("rounded-button", "icon-button", "add-button");
 		button.onclick = () => {
 			// recreating dialog is trash but idk how to hook it up "nicely"
 			// otherwise
 			const dialog = document.createElement("dialog");
 			const p = document.createElement("p");
 			p.innerText =
-				"Pick a type of stream to add, screen, audio, or video";
+				"Pick media to stream to the other instance: " +
+				"screen, audio, or video";
 			dialog.appendChild(p);
 			this.shadowRoot!.appendChild(dialog);
 			const cleanup = () => this.shadowRoot!.removeChild(dialog);
@@ -55,11 +32,23 @@ export class WebRtcTrackCommandsElement extends ShadowedWithStylesheetElement {
 			const container = document.createElement("div");
 			container.classList.add("button-container");
 			const screenShare = document.createElement("button");
-			screenShare.classList.add("icon-button", "screen-icon");
+			screenShare.classList.add(
+				"rounded-button",
+				"icon-button",
+				"screen-icon"
+			);
 			const audioShare = document.createElement("button");
-			audioShare.classList.add("icon-button", "microphone-icon");
+			audioShare.classList.add(
+				"rounded-button",
+				"icon-button",
+				"microphone-icon"
+			);
 			const videoShare = document.createElement("button");
-			videoShare.classList.add("icon-button", "video-icon");
+			videoShare.classList.add(
+				"rounded-button",
+				"icon-button",
+				"video-icon"
+			);
 
 			container.appendChild(screenShare);
 			container.appendChild(audioShare);

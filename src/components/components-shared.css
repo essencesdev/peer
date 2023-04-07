@@ -1,0 +1,16 @@
+.rounded-button {
+	background: var(--grey-1);
+	border: 1px solid var(--blue-1);
+	color: var(--blue-2);
+	border-radius: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.rounded-button:not(:disabled):hover {
+	filter: invert(10%);
+}
+.rounded-button:disabled,
+.rounded-button:not(:disabled):active {
+	filter: invert(25%);
+}

@@ -8,23 +8,10 @@ export class WebRtcMediaElement extends WindowElement {
 	constructor() {
 		super();
 
-		const style = document.createElement("style");
-		style.innerHTML = `
-			.media-container {
-				width: 100%;
-				height: 100%;
-				overflow: auto;
-			}
-			video {
-				margin: 16px;
-				width: calc(100% - 42px);
-				height: calc(100% - 42px);
-			}
-			video[isSource] {
-				border: 5px solid var(--red-1);
-			}
-		`;
-		this.shadowRoot!.appendChild(style);
+		const styleSheet = document.createElement("link");
+		styleSheet.rel = "stylesheet";
+		styleSheet.href = "components/webrtc-media.css";
+		this.shadowRoot!.appendChild(styleSheet);
 
 		const mediaContainer = document.createElement("div");
 		mediaContainer.classList.add("media-container");
